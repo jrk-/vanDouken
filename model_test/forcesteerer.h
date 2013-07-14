@@ -25,16 +25,20 @@ class ForceSteerer : public QObject, public Steerer<CanvasCell>
 public:
     using Steerer<CanvasCell>::Topology;
     using Steerer<CanvasCell>::GridType;
-    typedef LibGeoDecomp::Region<Topology::DIMENSIONS> Region;
+    typedef LibGeoDecomp::Region<Topology::DIM> Region;
 
     ForceSteerer(const unsigned period) :
         LibGeoDecomp::Steerer<CanvasCell>(period)
     {}
 
-    virtual void nextStep(
-        GridType *grid, 
-        const Region& validRegion, 
-        const unsigned& step) 
+    void nextStep(
+        GridType *grid,
+        const Region& validRegion,
+        const CoordType& globalDimensions,
+        unsigned step,
+        LibGeoDecomp::SteererEvent event,
+        std::size_t rank,
+        bool lastCall)
     {
         LibGeoDecomp::MPILayer layer;
         boost::mutex::scoped_lock lock(mutex);
@@ -88,23 +92,23 @@ public slots:
 
     void renderForce(int posX, int posY, const FloatCoord<2>& force, GridType *grid, const Region& validRegion, Region *lastRenderedRegion)
     {
-        int size = 10;
-        Region newRegion;
-        for (int y = -size; y < size; ++y) {
-            newRegion << Streak<2>(Coord<2>(posX - size, posY + y), posX + size);
-        }
+      int size = 10;
+      Region newRegion;
+      for (int y = -size; y < size; ++y) {
+        newRegion << Streak<2>(Coord<2>(posX - size, posY + y), posX + size);
+      }
 
-        Region relevantRegion = newRegion & *lastRenderedRegion & validRegion;
+      Region relevantRegion = newRegion & *lastRenderedRegion & validRegion;
 
-        for (Region::StreakIterator i = relevantRegion.beginStreak(); 
-             i != relevantRegion.endStreak(); 
-             ++i) {
-            for (Coord<2> c = i->origin; c.x() < i->endX; ++c.x()) {
-                grid->at(c).setForceVario(force[0], force[1]);
-            }
+      for (Region::StreakIterator i = relevantRegion.beginStreak(); 
+          i != relevantRegion.endStreak(); 
+          ++i) {
+        for (Coord<2> c = i->origin; c.x() < i->endX; ++c.x()) {
+          grid->at(c).setForceVario(force[0], force[1]);
         }
-        
-        *lastRenderedRegion = newRegion;
+      }
+
+      *lastRenderedRegion = newRegion;
     }
 
 
@@ -113,5 +117,7 @@ private:
     SuperVector<FloatCoord<2> > deltas;
     boost::mutex mutex;
 };
+
+#include "forcesteerer.h.moc"
 
 #endif

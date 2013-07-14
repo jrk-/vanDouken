@@ -40,4 +40,6 @@ private:
     NonHPXFPSCounter counter;
 };
 
+#include "fakesimulator.h.moc"
+
 #endif

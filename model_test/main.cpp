@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     Storage * storage = 0;
     if (MPILayer().rank() == 0) {
         storage = new Storage;
-        widget = new ParticleWidget(*storage, init->gridDimensions(), Qt::black);
+        widget = new ParticleWidget(*storage, init->gridDimensions().x(), init->gridDimensions().y(), Qt::black);
         widget->resize(1000, 500);
         widget->show();
         std::cout << "Widget created ...\n";
@@ -132,3 +132,4 @@ int main(int argc, char **argv)
     delete sim;
     MPI::Finalize();
 }
+g++ -std=c++11 $(pkg-config --libs --cflags QtOpenGL QtGui gl glu ompi-cxx) -lboost_system -lboost_date_time ../libgeodecomp/build/libgeodecomp.so -I../libgeodecomp/src/libgeodecomp -I.. -I. main.cpp 2>&1 | less

@@ -1,34 +1,13 @@
 #ifndef _particle_h_
 #define _particle_h_
 
-#if !defined(__ANDROID__) || !defined(ANDROID)
+#include <cmath>
+#include <boost/serialization/is_bitwise_serializable.hpp>
 #include <QColor>
-#else
-inline int qRed(unsigned int rgb)
-{
-    return ((rgb >> 16) & 0xff); 
-}
-
-inline int qGreen(unsigned int rgb)
-{
-    return ((rgb >> 8) & 0xff); 
-}
-
-inline int qBlue(unsigned int rgb)
-{
-    return (rgb & 0xff); 
-}
-
-inline int qAlpha(unsigned int rgb)
-{
-    return rgb >> 24; 
-}
-#endif
-
 
 struct Particles
 {
-    void setParticle(std::size_t i, float posX, float posY, float posZ, float angle, boost::uint32_t color)
+    void setParticle(std::size_t i, float posX, float posY, float posZ, float angle, uint32_t color)
     {
         posAngle[i * 4 + 0] = /*static_cast<boost::uint32_t>*/std::ceil(posX * 100.f);
         posAngle[i * 4  + 1] = /*static_cast<boost::uint32_t>*/std::ceil(posY * 100.f);
@@ -56,8 +35,8 @@ struct Particles
         ar & colors;
     }
 
-    LibGeoDecomp::SuperVector<float> posAngle;
-    LibGeoDecomp::SuperVector<boost::uint32_t> colors;
+    std::vector<float> posAngle;
+    std::vector<uint32_t> colors;
 };
 
 class Particle

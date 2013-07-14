@@ -35,12 +35,13 @@ public:
         halfHeight(dimensions.y() / 2)
     {}
 
-    virtual void stepFinished(
+    void stepFinished(
         const GridType& grid, 
         const MyRegion& validRegion, 
         const Coord<2>& globalDimensions,
         unsigned step, 
         LibGeoDecomp::WriterEvent event, 
+        std::size_t rank,
         bool lastCall) 
     {
         if (step % getPeriod() != 0) {
@@ -79,9 +80,9 @@ public:
         }
 
         // fixme: gather inner region AND ghost 
-        mpiLayer.gatherV(&particles.posAngle[0], cursor * 4, particleCounts, 0,
+        mpiLayer.gatherV(&particles.posAngle, cursor * 4, particleCounts, 0,
                       &allParticles.posAngle, MPI_FLOAT);
-        mpiLayer.gatherV(&particles.colors[0], cursor, colorCounts, 0,
+        mpiLayer.gatherV(&particles.colors, cursor, colorCounts, 0,
                       &allParticles.colors, MPI_INT);
 
         if (mpiLayer.rank() == 0) {
